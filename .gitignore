@@ -12,3 +12,4 @@ backend/.env
 dist/
 build/
 .DS_Store
+desktop.ini
