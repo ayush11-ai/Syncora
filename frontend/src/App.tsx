@@ -1,76 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Editor, { type BeforeMount } from "@monaco-editor/react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
-
-type Lang = "html" | "css" | "javascript";
-type LayoutMode = "stack-left" | "row-top" | "grid-2x2" | "full-preview";
-
-interface EditorConfig {
-  id: Lang;
-  label: string;
-  file: string;
-  color: string;
-}
-
-const EDITORS: EditorConfig[] = [
-  { id: "html", label: "HTML5", file: "index.html", color: "#e34c26" },
-  { id: "css", label: "CSS3", file: "styles.css", color: "#2f81f7" },
-  { id: "javascript", label: "JavaScript", file: "script.js", color: "#e3b341" },
-];
-
-const DEFAULT_HTML = `<div class="box-card">
-  <h2>Welcome to Syncora ✨</h2>
-  <p>Collaborative coding made effortless.</p>
-  <button id="cta">Get Started</button>
-</div>`;
-
-const DEFAULT_CSS = `body {
-  display: grid;
-  place-items: center;
-  height: 100vh;
-  margin: 0;
-  background: #f8fafc;
-  font-family: system-ui, sans-serif;
-}
-
-.box-card {
-  padding: 2rem;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-}
-
-button {
-  padding: 8px 16px;
-  background: #0f172a;
-  color: #fff;
-  border: 0;
-  border-radius: 6px;
-  cursor: pointer;
-}`;
-
-constt DEFAULT_JS = `document.getElementById("cta").onclick = () => {
-  alert("Welcome aboard! Ready to code?");
-};`;
-
-const defineTheme: BeforeMount = (monaco) => {
-  monaco.editor.defineTheme("syncora-dark", {
-    base: "vs-dark",
-    inherit: true,
-    rules: [],
-    colors: {
-      "editor.background": "#0d1117",
-      "editor.lineHighlightBackground": "#161b22",
-      "editorGutter.background": "#0d1117",
-    },
-  });
-};
+import AuthScreen from "./components/AuthScreen";
+import EditorCard from "./components/EditorCard";
+import {
+  EDITORS,
+  DEFAULT_HTML,
+  DEFAULT_CSS,
+  DEFAULT_JS,
+  type Lang,
+  type LayoutMode,
+  type UserProfile
+} from "./utils/constants";
 
 function buildDocument(html: string, css: string, js: string): string {
-  const safeJs = js.replace(/<\/script/gi, "<\\/script");
+  const closingScriptPattern = new RegExp("</script", "gi");
+  const safeJs = js.replace(closingScriptPattern, "<\\/script");
   return `<!DOCTYPE html>
 <html>
 <head><style>${css}</style></head>
@@ -83,63 +28,13 @@ try { ${safeJs} } catch (err) { console.error(err); }
 </html>`;
 }
 
-interface EditorCardProps {
-  config: EditorConfig;
-  value: string;
-  onChange: (value: string) => void;
-  onExpand?: () => void;
-  onMinimize?: () => void;
-}
-
-function EditorCard({ config, value, onChange, onExpand, onMinimize }: EditorCardProps) {
-  return (
-    <section className="box">
-      <header className="box-head">
-        <div className="d-flex align-items-center gap-2">
-          <span
-            className="badge-tag"
-            style={{
-              color: config.color,
-              borderColor: `${config.color}55`,
-              background: `${config.color}1a`,
-            }}
-          >
-            {config.label}
-          </span>
-          <span className="file-txt">{config.file}</span>
-        </div>
-        {(onExpand || onMinimize) && (
-          <div className="d-flex gap-1">
-            {onMinimize && (
-              <button className="mini-btn" onClick={onMinimize}>–</button>
-            )}
-            {onExpand && (
-              <button className="mini-btn" onClick={onExpand}>□</button>
-            )}
-          </div>
-        )}
-      </header>
-      <div className="box-body">
-        <Editor
-          language={config.id}
-          value={value}
-          theme="syncora-dark"
-          beforeMount={defineTheme}
-          onChange={(v) => onChange(v ?? "")}
-          options={{
-            fontSize: 13,
-            fontFamily: "monospace",
-            minimap: { enabled: false },
-            padding: { top: 8 },
-            wordWrap: "on",
-          }}
-        />
-      </div>
-    </section>
-  );
-}
-
 export default function App() {
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem("syncora_token"));
+  const [user, setUser] = useState<UserProfile | null>(() => {
+    const saved = localStorage.getItem("syncora_user");
+    return saved ? JSON.parse(saved) : null;
+  });
+
   const [code, setCode] = useState<Record<Lang, string>>({
     html: DEFAULT_HTML,
     css: DEFAULT_CSS,
@@ -149,7 +44,6 @@ export default function App() {
   const [srcDoc, setSrcDoc] = useState(() =>
     buildDocument(DEFAULT_HTML, DEFAULT_CSS, DEFAULT_JS)
   );
-  const [runCount, setRunCount] = useState(0);
 
   const [layout, setLayout] = useState<LayoutMode>("stack-left");
   const [viewMenuOpen, setViewMenuOpen] = useState(false);
@@ -162,15 +56,27 @@ export default function App() {
   const stackRef = useRef<HTMLDivElement>(null);
   const dropRef = useRef<HTMLDivElement>(null);
 
+  const handleAuthenticated = (newToken: string, userProfile: UserProfile) => {
+    localStorage.setItem("syncora_token", newToken);
+    localStorage.setItem("syncora_user", JSON.stringify(userProfile));
+    setToken(newToken);
+    setUser(userProfile);
+  };
+
+  const handleSignOut = () => {
+    localStorage.removeItem("syncora_token");
+    localStorage.removeItem("syncora_user");
+    setToken(null);
+    setUser(null);
+  };
+
   const run = useCallback(() => {
     setSrcDoc(buildDocument(code.html, code.css, code.javascript));
-    setRunCount((n) => n + 1);
   }, [code]);
 
   const resetCode = () => {
     setCode({ html: DEFAULT_HTML, css: DEFAULT_CSS, javascript: DEFAULT_JS });
     setSrcDoc(buildDocument(DEFAULT_HTML, DEFAULT_CSS, DEFAULT_JS));
-    setRunCount(0);
   };
 
   useEffect(() => {
@@ -208,10 +114,12 @@ export default function App() {
     const move = (ev: PointerEvent) => {
       if (dir === "h") {
         const pct = ((ev.clientX - rect.left) / rect.width) * 100;
-        setSplitRatio(Math.min(80, Math.max(20, pct)));
+        setSplitRatio(Math.min(85, Math.max(15, pct)));
       } else {
         const pct = ((ev.clientY - rect.top) / rect.height) * 100;
-        layout === "grid-2x2" ? setQuadRowRatio(Math.min(80, Math.max(20, pct))) : setSplitRatio(Math.min(80, Math.max(20, pct)));
+        layout === "grid-2x2"
+          ? setQuadRowRatio(Math.min(85, Math.max(15, pct)))
+          : setSplitRatio(Math.min(85, Math.max(15, pct)));
       }
     };
     const up = () => {
@@ -285,14 +193,27 @@ export default function App() {
     </div>
   );
 
+  if (!token) {
+    return <AuthScreen onAuthenticated={handleAuthenticated} />;
+  }
+
   return (
     <div className={`app ${dragging ? "no-select" : ""}`}>
       <nav className="topnav">
-        <div className="d-flex align-items-center gap-2">
-          <span className="brand">⚡ Syncora</span>
+        <div className="d-flex align-items-center gap-4">
+          <div className="brand-group d-flex align-items-center gap-2">
+            <svg className="nav-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="22" height="22">
+              <rect width="24" height="24" rx="4" fill="#fafafa"/>
+              <path d="M8.5 7.5L3.5 12L8.5 16.5" stroke="#09090b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M15.5 7.5L20.5 12L15.5 16.5" stroke="#09090b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M13.5 4.5L8.5 12.5H13.5L10.5 19.5L16.5 10.5H11.5L13.5 4.5Z" fill="#09090b"/>
+            </svg>
+            <span className="brand">Syncora</span>
+          </div>
+          {user && <span className="user-chip">{user.email}</span>}
         </div>
 
-        <div className="d-flex align-items-center gap-2">
+        <div className="d-flex align-items-center gap-3">
           <div className="position-relative" ref={dropRef}>
             <button className="tool-btn" onClick={() => setViewMenuOpen(!viewMenuOpen)}>
               Change View
@@ -314,18 +235,30 @@ export default function App() {
                     </button>
                   ))}
                 </div>
-                <button className="reset-link" onClick={resetSizes}>Reset Sizes</button>
+                <button className="reset-link" onClick={resetSizes}>
+                  Reset Sizes
+                </button>
               </div>
             )}
           </div>
 
-          <span className="shortcut">{isMac ? "⌘" : "Ctrl"} + Enter</span>
-          
-          <button className="reset-btn" onClick={resetCode} title="Reset code to default">
-            Reset
+          <div className="d-flex align-items-center gap-2">
+            <span className="shortcut">{isMac ? "⌘" : "Ctrl"} + Enter</span>
+            <button className="tool-btn" onClick={resetCode} title="Reset code to default">
+              Reset
+            </button>
+          </div>
+
+          <button className="run-btn" onClick={run}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 3L19 12L5 21V3Z" />
+            </svg>
+            Run
           </button>
 
-          <button className="run-btn" onClick={run}>▶ Run</button>
+          <button className="tool-btn signout" onClick={handleSignOut}>
+            Sign out
+          </button>
         </div>
       </nav>
 
@@ -377,23 +310,43 @@ export default function App() {
         )}
 
         {layout === "grid-2x2" && (
-          <div className="w-100 h-100 d-flex flex-column">
-            <div className="d-flex" style={{ height: `${quadRowRatio}%` }}>
-              <div style={{ width: `${splitRatio}%`, height: "100%" }}>
-                <EditorCard config={EDITORS[0]} value={code.html} onChange={(v) => setCode({ ...code, html: v })} />
+          <div className="w-100 h-100 d-flex flex-column overflow-hidden">
+            <div className="d-flex w-100" style={{ height: `${quadRowRatio}%`, minHeight: 0 }}>
+              <div style={{ width: `${splitRatio}%`, height: "100%", minWidth: 0, overflow: "hidden" }}>
+                <EditorCard
+                  config={EDITORS[0]}
+                  value={code.html}
+                  onChange={(v) => setCode({ ...code, html: v })}
+                  onExpand={() => expandBox(0)}
+                  onMinimize={() => minimizeBox(0)}
+                />
               </div>
               <div className="drag-v" onPointerDown={(e) => startMainResize(e, "h")} />
-              <div className="flex-grow-1 h-100">
-                <EditorCard config={EDITORS[1]} value={code.css} onChange={(v) => setCode({ ...code, css: v })} />
+              <div className="flex-grow-1 h-100" style={{ minWidth: 0, overflow: "hidden" }}>
+                <EditorCard
+                  config={EDITORS[1]}
+                  value={code.css}
+                  onChange={(v) => setCode({ ...code, css: v })}
+                  onExpand={() => expandBox(1)}
+                  onMinimize={() => minimizeBox(1)}
+                />
               </div>
             </div>
             <div className="drag-h" onPointerDown={(e) => startMainResize(e, "v")} />
-            <div className="d-flex flex-grow-1">
-              <div style={{ width: `${splitRatio}%`, height: "100%" }}>
-                <EditorCard config={EDITORS[2]} value={code.javascript} onChange={(v) => setCode({ ...code, javascript: v })} />
+            <div className="d-flex flex-grow-1 w-100" style={{ minHeight: 0 }}>
+              <div style={{ width: `${splitRatio}%`, height: "100%", minWidth: 0, overflow: "hidden" }}>
+                <EditorCard
+                  config={EDITORS[2]}
+                  value={code.javascript}
+                  onChange={(v) => setCode({ ...code, javascript: v })}
+                  onExpand={() => expandBox(2)}
+                  onMinimize={() => minimizeBox(2)}
+                />
               </div>
               <div className="drag-v" onPointerDown={(e) => startMainResize(e, "h")} />
-              <div className="flex-grow-1 h-100">{renderPreview()}</div>
+              <div className="flex-grow-1 h-100" style={{ minWidth: 0, overflow: "hidden" }}>
+                {renderPreview()}
+              </div>
             </div>
           </div>
         )}
