@@ -253,7 +253,7 @@ export default function App() {
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
               <path d="M5 3L19 12L5 21V3Z" />
             </svg>
-            RUN 
+            Run
           </button>
 
           <button className="tool-btn signout" onClick={handleSignOut}>
