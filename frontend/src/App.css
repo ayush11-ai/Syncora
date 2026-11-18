@@ -238,8 +238,8 @@ html, body, #root {
 .topnav {
   height: 52px;
   padding: 0 24px;
-  background: #09090b;
-  border-bottom: 1px solid #27272a;
+  background: #111111;
+  border-bottom: 2px solid #3b3b3b;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -267,7 +267,7 @@ html, body, #root {
   font-size: 12px;
   color: #a1a1aa;
   padding: 4px 8px;
-  border: 1px solid #27272a;
+  border: 1px solid #242427;
   border-radius: 6px;
   font-family: monospace;
 }
@@ -275,7 +275,7 @@ html, body, #root {
 .tool-btn {
   background: transparent;
   color: #fafafa;
-  border: 1px solid #27272a;
+  border:  2px solid #6a6a6a;
   border-radius: 6px;
   padding: 6px 14px;
   font-size: 13px;
@@ -325,7 +325,7 @@ html, body, #root {
   gap: 12px;
   min-height: 0;
   overflow: hidden;
-  background: #ffffff;
+  background: black;
 }
 
 .workspace.layout-stack-left {
