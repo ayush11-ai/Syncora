@@ -278,7 +278,7 @@ html, body, #root {
   border:  2px solid #6a6a6a;
   border-radius: 6px;
   padding: 6px 14px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -290,7 +290,7 @@ html, body, #root {
 
 .tool-btn.signout {
   border: none;
-  color: #a1a1aa;
+  color: #bcbcc7;
   padding-right: 0;
 }
 
