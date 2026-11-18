@@ -200,18 +200,17 @@ export default function App() {
   return (
     <div className={`app ${dragging ? "no-select" : ""}`}>
       <nav className="topnav">
-        <div className="d-flex align-items-center gap-4">
-          <div className="brand-group d-flex align-items-center gap-2">
-            <svg className="nav-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="22" height="22">
-              <rect width="24" height="24" rx="4" fill="#fafafa"/>
-              <path d="M8.5 7.5L3.5 12L8.5 16.5" stroke="#09090b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M15.5 7.5L20.5 12L15.5 16.5" stroke="#09090b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M13.5 4.5L8.5 12.5H13.5L10.5 19.5L16.5 10.5H11.5L13.5 4.5Z" fill="#09090b"/>
-            </svg>
-            <span className="brand">Syncora</span>
-          </div>
-          {user && <span className="user-chip">{user.email}</span>}
-        </div>
+       <div className="d-flex align-items-center gap-4">
+        <div className="brand-group d-flex align-items-center gap-2">
+                  <svg className="nav-logo" viewBox="0 0 24 24" width="22" height="22">
+                 <rect width="24" height="24" rx="4" fill="#fafafa" />
+                  <path d="M8.5 7.5 3.5 12l5 4.5M15.5 7.5l5 4.5-5 4.5" stroke="#09090b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                  <path d="m13.5 4.5-5 8h5l-3 7 6-9h-5l2-6z" fill="#09090b" />
+                 </svg>
+                    <span className="brand">Syncora</span>
+                 </div>
+                   {user && <span className="user-chip">{user.email}</span>}
+                </div>
 
         <div className="d-flex align-items-center gap-3">
           <div className="position-relative" ref={dropRef}>
