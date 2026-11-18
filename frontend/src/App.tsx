@@ -202,11 +202,11 @@ export default function App() {
       <nav className="topnav">
        <div className="d-flex align-items-center gap-4">
         <div className="brand-group d-flex align-items-center gap-2">
-                  <svg className="nav-logo" viewBox="0 0 24 24" width="22" height="22">
-                 <rect width="24" height="24" rx="4" fill="#fafafa" />
-                  <path d="M8.5 7.5 3.5 12l5 4.5M15.5 7.5l5 4.5-5 4.5" stroke="#09090b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                  <path d="m13.5 4.5-5 8h5l-3 7 6-9h-5l2-6z" fill="#09090b" />
-                 </svg>
+                <svg className="nav-logo" viewBox="0 0 24 24" width="22" height="22">
+                <rect width="24" height="24" rx="4" fill="#fafafa" />
+                <path d="M8.5 7.5 3.5 12l5 4.5M15.5 7.5l5 4.5-5 4.5" stroke="#09090b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                <path d="m13.5 4.5-5 8h5l-3 7 6-9h-5l2-6z" fill="#09090b" />
+                </svg>
                     <span className="brand">Syncora</span>
                  </div>
                    {user && <span className="user-chip">{user.email}</span>}

@@ -41,20 +41,20 @@ export default function EditorCard({ config, value, onChange, onExpand, onMinimi
         </div>
         {(onExpand || onMinimize) && (
           <div className="d-flex gap-2">
-            {onMinimize && (
-              <button className="mini-btn" onClick={onMinimize} title="Minimize pane">
+      {onMinimize && (
+          <button className="mini-btn" onClick={onMinimize} title="Minimize pane">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-              </button>
-            )}
-            {onExpand && (
-              <button className="mini-btn" onClick={onExpand} title="Expand pane">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                </svg>
-              </button>
-            )}
+                <path d="M5 12h14" />
+              </svg>
+          </button>
+       )}
+      {onExpand && (
+         <button className="mini-btn" onClick={onExpand} title="Expand pane">
+           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+             <rect x="3" y="3" width="18" height="18" rx="2" />
+           </svg>
+         </button>
+       )}
           </div>
         )}
       </header>
