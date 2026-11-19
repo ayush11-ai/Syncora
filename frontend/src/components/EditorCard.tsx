@@ -14,6 +14,22 @@ const defineTheme: BeforeMount = (monaco) => {
   });
 };
 
+const EDITOR_OPTIONS = {
+  fontSize: 13,
+  fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+  minimap: { enabled: false },
+  padding: { top: 12 },
+  wordWrap: "on" as const,
+  scrollBeyondLastLine: false,
+  lineNumbersMinChars: 3,
+  overviewRulerLanes: 0,
+  hideCursorInOverviewRuler: true,
+  scrollbar: {
+    vertical: "hidden" as const,
+    horizontal: "hidden" as const,
+  },
+};
+
 interface EditorCardProps {
   config: EditorConfig;
   value: string;
@@ -23,63 +39,44 @@ interface EditorCardProps {
 }
 
 export default function EditorCard({ config, value, onChange, onExpand, onMinimize }: EditorCardProps) {
+  const { id, label, file, color } = config;
+
   return (
     <section className="box">
       <header className="box-head">
         <div className="d-flex align-items-center gap-3">
-          <span
-            className="badge-tag"
-            style={{
-              color: config.color,
-              borderColor: `${config.color}50`,
-              background: "transparent",
-            }}
-          >
-            {config.label}
+          <span className="badge-tag" style={{ color, borderColor: `${color}50` }}>
+            {label}
           </span>
-          <span className="file-txt">{config.file}</span>
+          <span className="file-txt">{file}</span>
         </div>
         {(onExpand || onMinimize) && (
           <div className="d-flex gap-2">
-      {onMinimize && (
-          <button className="mini-btn" onClick={onMinimize} title="Minimize pane">
+            {onMinimize && (
+              <button className="mini-btn" onClick={onMinimize} title="Minimize pane">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14" />
-              </svg>
-          </button>
-       )}
-      {onExpand && (
-         <button className="mini-btn" onClick={onExpand} title="Expand pane">
-           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-             <rect x="3" y="3" width="18" height="18" rx="2" />
-           </svg>
-         </button>
-       )}
+                  <path d="M5 12h14" />
+                </svg>
+              </button>
+            )}
+            {onExpand && (
+              <button className="mini-btn" onClick={onExpand} title="Expand pane">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                </svg>
+              </button>
+            )}
           </div>
         )}
       </header>
       <div className="box-body">
         <Editor
-          language={config.id}
+          language={id}
           value={value}
           theme="syncora-dark"
           beforeMount={defineTheme}
           onChange={(v) => onChange(v ?? "")}
-          options={{
-            fontSize: 13,
-            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-            minimap: { enabled: false },
-            padding: { top: 12 },
-            wordWrap: "on",
-            scrollBeyondLastLine: false,
-            lineNumbersMinChars: 3,
-            overviewRulerLanes: 0,
-            hideCursorInOverviewRuler: true,
-            scrollbar: {
-              vertical: 'hidden',
-              horizontal: 'hidden'
-            }
-          }}
+          options={EDITOR_OPTIONS}
         />
       </div>
     </section>
